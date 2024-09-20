@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Listado de Países{% endblock %}
+{% block content %}
+  <div class="container mt-4">
+    <h1 class="text-center mb-4">Listado de Países</h1>
+    
+    <!-- Formulario de búsqueda -->
+    <form method="GET" action="{% url 'pais_list' %}" class="mb-4">
+      <div class="input-group" style="max-width: 400px; margin: auto;">
+        <input type="text" name="search" class="form-control" placeholder="Buscar países..." aria-label="Buscar países...">
+        <div class="input-group-append">
+          <button class="btn btn-outline-secondary" type="submit">
+            <i class="bi bi-search"></i>
+          </button>
+          {% if request.GET.search %}
+            <a href="{% url 'pais_list' %}" class="btn btn-outline-danger">
+              <i class="bi bi-x-circle"></i>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+
+    <!-- Listado de países -->
+    <ul class="list-group mb-4">
+      {% for pais in page_obj %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          {{ pais.nombre }} ({{ pais.codigo }})
+          <span>
+            {% if can_change %}
+              <a href="{% url 'pais_update' pais.pk %}" class="btn btn-sm btn-warning">
+                <i class="bi bi-pencil"></i> Editar
+              </a>
+            {% endif %}
+            {% if can_delete %}
+              <a href="{% url 'pais_delete' pais.pk %}" class="btn btn-sm btn-danger">
+                <i class="bi bi-trash"></i> Eliminar
+              </a>
+            {% endif %}
+          </span>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <!-- Paginación -->
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1">Primera</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+          </li>
+        {% endif %}
+    
+        {% with page_obj.paginator.num_pages as total_pages %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 or num == 1 or num == total_pages %}
+              <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        {% endwith %}
+    
+        {% if page_obj.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ total_pages }}">Última</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  
+    {% if can_add %}
+      <div class="text-center mt-4">
+        <a href="{% url 'pais_create' %}" class="btn btn-primary">
+          <i class="bi bi-plus-circle"></i> Agregar País
+        </a>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

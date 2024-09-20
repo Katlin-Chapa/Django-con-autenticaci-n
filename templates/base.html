@@ -1,0 +1,77 @@
+{% load static %}
+<DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mi Primer Proyecto{% endblock %}</title>
+
+    <!-- Agrega el enlace al archivo CSS de Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'estilos.css' %}" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
+
+
+    {% block extra_style %}
+
+    {% endblock %}
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="/">Inicio</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                {% if user.is_authenticated %}
+                   <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about/">Acerca de</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact/">Contacto</a>
+                    </li>
+                    <li class="nav-item">
+                        <form method="POST" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="nav-link">Cerrar Sesión</button>
+                        </form>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'pais_list' %}">Países</a>
+                    </li>
+                </ul>
+
+                {% else %}
+                   <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about/">Acerca de</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact/">Contacto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auth/login">Iniciar Sesión</a>
+                    </li>
+                </ul>
+                {% endif %}
+
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mt-4">
+        <!-- Aquí se mostrará el contenido principal de tus páginas -->
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-light text-center py-3">
+        <!-- Aquí puedes incluir el pie de página de tu sitio -->
+        <p>Derechos de autor &copy; {{ year }} Katlin Chapa</p>
+    </footer>
+
+    <!-- Agrega los scripts de Bootstrap al final del documento -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap/dist/js/bootstrap.min.js"></script>
+</body>
+</html>
