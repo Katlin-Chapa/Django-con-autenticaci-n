@@ -13,7 +13,9 @@ class DepartamentoAdmin(admin.ModelAdmin):
 
 
 class MunicipioAdmin(admin.ModelAdmin):
-    list_display = ['nombre']
+    list_display = ['nombre', 'departamento', 'active']
+    list_filter = ['departamento__nombre', 'active']
+    search_fields = ['nombre', 'departamento__nombre']
 
 admin.site.register(Departamento, DepartamentoAdmin)
 admin.site.register(Pais, PaisAdmin)

@@ -16,7 +16,7 @@ class Pais(models.Model):
 class Departamento(models.Model):
     nombre = models.CharField(max_length=50)
     pais = models.ForeignKey(Pais, on_delete=models.PROTECT)
-    codigo = models.CharField(max_length=5, null=True, blank=True)
+    codigo = models.CharField(max_length=4, null=True, blank=True)
     active = models.BooleanField(default=True, verbose_name='activo')
 
     class Meta:

@@ -7,7 +7,7 @@ from .forms import PaisForm, DepartamentoForm, MunicipioForm
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .serializers import PaisSerializer, DepartamentoSerializer
+from .serializers import PaisSerializer, DepartamentoSerializer, MunicipioSerializer
 from django.core.paginator import Paginator
 
 # Create your views here.
@@ -22,7 +22,7 @@ class PaisListView(LoginRequiredMixin, ListView):
     permission_required = 'Catalogo.view_pais'
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().order_by('nombre')
         search_query = self.request.GET.get('search')
         if search_query:
             queryset = queryset.filter(nombre__icontains=search_query)
@@ -83,7 +83,7 @@ class DepartamentoListView(LoginRequiredMixin, ListView):
     permission_required = 'Catalogo.view_departamento'
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().order_by('pais')
         search_query = self.request.GET.get('search')
         pais_id = self.request.GET.get('pais')
         active = self.request.GET.get('active')
@@ -147,3 +147,78 @@ class DepartamentoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, Delete
     success_url = reverse_lazy('departamento_list')
     login_url = reverse_lazy('login')
     permission_required = 'Catalogo.delete_departamento'
+
+# Para Municipio
+
+class MunicipioListView(LoginRequiredMixin, ListView):
+    model = Municipio
+    template_name = 'municipio/municipio_list.html'
+    context_object_name = 'municipios'
+    login_url = reverse_lazy('login')
+    permission_required = 'Catalogo.view_municipio'
+
+    def get_queryset(self):
+        queryset = super().get_queryset().order_by('departamento')
+        search_query = self.request.GET.get('search')
+        departamento_id = self.request.GET.get('departamento')
+        active = self.request.GET.get('active')
+
+        if search_query:
+            queryset = queryset.filter(nombre__icontains=search_query)
+
+        if departamento_id:
+            queryset = queryset.filter(departamento__id=departamento_id)
+
+        # Verifica si 'active' no es nulo 
+        if active == '1':  # Si 'active' es "1", filtra solo los activos
+            queryset = queryset.filter(active=True)
+        elif active == '0':  # Si 'active' es "0", filtra solo los inactivos
+            queryset = queryset.filter(active=False)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['departamentos'] = Departamento.objects.all()
+        context['can_add'] = self.request.user.has_perm('Catalogo.add_municipio')
+        context['can_change'] = self.request.user.has_perm('Catalogo.change_municipio')
+        context['can_delete'] = self.request.user.has_perm('Catalogo.delete_municipio')
+
+        # Paginación
+        paginator = Paginator(context['municipios'], 5)  
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context['page_obj'] = page_obj
+        
+        # Total de páginas
+        context['total_pages'] = paginator.num_pages
+        return context
+    
+class MunicipioViewSet(viewsets.ModelViewSet):
+    queryset = Municipio.objects.all()
+    serializer_class = MunicipioSerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+class MunicipioCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Municipio
+    form_class = MunicipioForm
+    template_name = 'municipio/municipio_form.html'
+    success_url = reverse_lazy('municipio_list')
+    login_url = reverse_lazy('login')
+    permission_required = 'Catalogo.add_municipio'
+
+class MunicipioUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Municipio
+    form_class = MunicipioForm
+    template_name = 'municipio/municipio_form.html'
+    success_url = reverse_lazy('municipio_list')
+    login_url = reverse_lazy('login')
+    permission_required = 'Catalogo.change_municipio'
+
+class MunicipioDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Municipio
+    template_name = 'municipio/municipio_delete.html'
+    success_url = reverse_lazy('municipio_list')
+    login_url = reverse_lazy('login')
+    permission_required = 'Catalogo.delete_municipio'

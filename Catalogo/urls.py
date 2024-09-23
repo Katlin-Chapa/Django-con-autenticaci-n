@@ -10,4 +10,8 @@ urlpatterns = [
     path('departamentos/nuevo/', DepartamentoCreateView.as_view(), name='departamento_create'),
     path('departamentos/<int:pk>/', DepartamentoUpdateView.as_view(), name='departamento_update'),
     path('departamentos/<int:pk>/eliminar/', DepartamentoDeleteView.as_view(), name='departamento_delete'),
+    path('municipios/', MunicipioListView.as_view(), name='municipio_list'),
+    path('municipios/nuevo/', MunicipioCreateView.as_view(), name='municipio_create'),
+    path('municipios/<int:pk>/', MunicipioUpdateView.as_view(), name='municipio_update'),
+    path('municipios/<int:pk>/eliminar/', MunicipioDeleteView.as_view(), name='municipio_delete'),
 ]
