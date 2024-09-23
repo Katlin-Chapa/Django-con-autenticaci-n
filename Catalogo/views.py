@@ -7,7 +7,7 @@ from .forms import PaisForm, DepartamentoForm, MunicipioForm
 from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .serializers import DepartamentoSerializer, PaisSerializer
+from .serializers import PaisSerializer, DepartamentoSerializer
 from django.core.paginator import Paginator
 
 # Create your views here.
@@ -72,3 +72,78 @@ class PaisViewSet(viewsets.ModelViewSet):
     serializer_class = PaisSerializer
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
+
+# Para Departamento
+
+class DepartamentoListView(LoginRequiredMixin, ListView):
+    model = Departamento
+    template_name = 'departamento/departamento_list.html'
+    context_object_name = 'departamentos'
+    login_url = reverse_lazy('login')
+    permission_required = 'Catalogo.view_departamento'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        search_query = self.request.GET.get('search')
+        pais_id = self.request.GET.get('pais')
+        active = self.request.GET.get('active')
+
+        if search_query:
+            queryset = queryset.filter(nombre__icontains=search_query)
+
+        if pais_id:
+            queryset = queryset.filter(pais__id=pais_id)
+
+        # Verifica si 'active' no es nulo 
+        if active == '1':  # Si 'active' es "1", filtra solo los activos
+            queryset = queryset.filter(active=True)
+        elif active == '0':  # Si 'active' es "0", filtra solo los inactivos
+            queryset = queryset.filter(active=False)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['paises'] = Pais.objects.all()
+        context['can_add'] = self.request.user.has_perm('Catalogo.add_departamento')
+        context['can_change'] = self.request.user.has_perm('Catalogo.change_departamento')
+        context['can_delete'] = self.request.user.has_perm('Catalogo.delete_departamento')
+
+        # Paginación
+        paginator = Paginator(context['departamentos'], 5)  
+        page_number = self.request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        context['page_obj'] = page_obj
+        
+        # Total de páginas
+        context['total_pages'] = paginator.num_pages
+        return context
+    
+class DepartamentoViewSet(viewsets.ModelViewSet):
+    queryset = Departamento.objects.all()
+    serializer_class = DepartamentoSerializer
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+class DepartamentoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
+    model = Departamento
+    form_class = DepartamentoForm
+    template_name = 'departamento/departamento_form.html'
+    success_url = reverse_lazy('departamento_list')
+    login_url = reverse_lazy('login')
+    permission_required = 'Catalogo.add_departamento'
+
+class DepartamentoUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
+    model = Departamento
+    form_class = DepartamentoForm
+    template_name = 'departamento/departamento_form.html'
+    success_url = reverse_lazy('departamento_list')
+    login_url = reverse_lazy('login')
+    permission_required = 'Catalogo.change_departamento'
+
+class DepartamentoDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteView):
+    model = Departamento
+    template_name = 'departamento/departamento_delete.html'
+    success_url = reverse_lazy('departamento_list')
+    login_url = reverse_lazy('login')
+    permission_required = 'Catalogo.delete_departamento'

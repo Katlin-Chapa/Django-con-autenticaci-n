@@ -1,8 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Formulario de Paises{% endblock %}
+{% block title %}Formulario de Departamentos{% endblock %}
 {% block content %}
 <div class="container mt-4">
-    <h1 class="mb-4">{% if pais.pk %}Editar País{% else %}Agregar País{% endif %}</h1>
+    <h1 class="mb-4">{% if departamento.pk %}Editar Departamento{% else %}Agregar Departamento{% endif %}</h1>
     <form method="post" class="bg-light p-4 rounded">
         {% csrf_token %}
         {{ form.as_p }}
@@ -10,8 +10,8 @@
             <button type="submit" class="btn btn-primary">
                 <i class="bi bi-save"></i> Guardar
             </button>
-            <a href="{% url 'pais_list' %}" class="btn btn-secondary">
-                <i class="bi bi-arrow-left"></i> Volver al Listado de Países
+            <a href="{% url 'departamento_list' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver al Listado de Departamentos
             </a>
         </div>
     </form>

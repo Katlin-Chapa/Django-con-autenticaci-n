@@ -18,10 +18,12 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
-from Catalogo.views import PaisViewSet
+from Catalogo.views import PaisViewSet, DepartamentoViewSet
 
 router = routers.DefaultRouter()
 router.register(r'pais', PaisViewSet)
+router.register(r'departamento', DepartamentoViewSet)
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),

@@ -6,7 +6,6 @@ class PaisForm(forms.ModelForm):
         model = Pais
         fields = ['nombre', 'codigo']
 
-
 class DepartamentoForm(forms.ModelForm):
     class Meta:
         model = Departamento
